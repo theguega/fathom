@@ -5,8 +5,8 @@
 
 use fathom_core::{Color, ImagePoint, Mat4, Meters, Radians, Rect, TextScale, Vec3, WorldPoint};
 use fathom_render::{
-    Camera, Ctx, begin_frame, draw_frames, draw_grid, draw_line_strip_3d, draw_polygon,
-    draw_text_at,
+    Camera, Ctx, Filter, Format, begin_frame, draw_frames, draw_grid, draw_line_strip_3d,
+    draw_polygon, draw_text_at, draw_texture, upload_texture,
 };
 
 const W: u32 = 64;
@@ -288,5 +288,52 @@ fn axis_triads_are_not_hidden_by_their_own_bones() {
     assert!(
         green > 3,
         "Y axis is colinear with the bone and must still win the depth tie, got {green} pixels"
+    );
+}
+
+#[test]
+fn a_colormap_reaches_the_screen_with_its_channels_in_order() {
+    let Some(mut ctx) = ctx() else { return };
+    ctx.set_clear_color(Color::BLACK);
+
+    // The path every heatmap takes: scalars -> colormap -> texture -> quad.
+    // Packing `Color` into a `u32` used to reverse the channels here on every
+    // little-endian machine, which is to say everywhere.
+    let colors = fathom_geom::colormap(&[0.0, 1.0], 0.0..1.0, fathom_core::ColorMap::Grey);
+    assert_eq!(
+        colors.first().copied().map(Color::channels),
+        Some([0, 0, 0, 255])
+    );
+
+    let red_then_blue = [Color::RED, Color::BLUE];
+    let (Some(w), Some(h)) = (core::num::NonZeroU32::new(2), core::num::NonZeroU32::new(1)) else {
+        return;
+    };
+    let Ok(tex) = upload_texture(
+        &ctx,
+        bytemuck::cast_slice(&red_then_blue),
+        w,
+        h,
+        Format::Rgba8,
+        Filter::Nearest,
+    ) else {
+        return;
+    };
+
+    let mut f = begin_frame(&mut ctx);
+    draw_texture(&mut f, &tex, Rect::new(0.0, 0.0, 64.0, 64.0), Color::WHITE);
+    f.end();
+
+    let px = ctx.read_pixels().unwrap_or_default();
+    // Left half is the first texel, right half the second.
+    assert_eq!(
+        pixel(&px, 8, 32),
+        [255, 0, 0, 255],
+        "left texel should be red"
+    );
+    assert_eq!(
+        pixel(&px, 56, 32),
+        [0, 0, 255, 255],
+        "right texel should be blue"
     );
 }

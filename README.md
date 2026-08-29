@@ -69,6 +69,29 @@ allocator asserts **zero heap allocations** between the first draw call and the
 last, and `trybuild` asserts that each of the type guarantees is still a
 compile error.
 
+## Python
+
+The same free functions, mirrored. numpy arrays cross zero-copy, and you still
+own the loop.
+
+```python
+import numpy as np, fathom
+
+r = fathom.Renderer.window("fathom", 1280, 720)
+orbit = fathom.Orbit(2.0)
+
+while r.poll():
+    r.begin_frame()
+    r.scene(orbit.camera(r.aspect))
+    fathom.draw_grid(r, 20, 0.1, (45, 45, 55, 255))
+    fathom.draw_line_strip_3d_vc(r, path, fathom.colormap(scores, 0, 1, "viridis"))
+    r.end_scene()
+    r.end_frame()
+```
+
+`pip install fathom`, or build from source with
+`maturin develop -m crates/fathom-py/Cargo.toml`.
+
 ## Crates
 
 | Crate | What it is |
@@ -77,6 +100,8 @@ compile error.
 | `fathom-core` | Types only. What adapter crates depend on, and nothing else. |
 | `fathom-geom` | Pure maths: pinhole projection, homography, colormaps. No GPU. |
 | `fathom-render` | The wgpu backend and every `draw_*`. |
+| `fathom-media` | mp4 export. Spawns `ffmpeg`; links no C libraries. |
+| `fathom-py` | The Python extension. |
 
 ## License
 
