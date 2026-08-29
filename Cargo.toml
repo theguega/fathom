@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/fathom-core"]
+members = ["crates/fathom-core", "crates/fathom-geom"]
 resolver = "3"
 
 [workspace.package]

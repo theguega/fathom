@@ -104,6 +104,15 @@ pub const fn point<F: CoordFrame>(v: F::Repr) -> Point<F> {
     Point::from_repr(v)
 }
 
+/// A point in the metric world frame.
+pub type WorldPoint = Point<World>;
+/// A point in a camera's own frame.
+pub type CameraPoint = Point<Camera>;
+/// A pixel in an image or in the window.
+pub type ImagePoint = Point<Image>;
+/// A point on a physical plane.
+pub type PlanePoint = Point<Plane>;
+
 macro_rules! impl_3d {
     ($($f:ty),*) => {$(
         impl Point<$f> {

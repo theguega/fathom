@@ -3,3 +3,7 @@ doc-valid-idents = ["MCAP", "LeRobot", "OpenCV", "Kalibr", "RealSense", "ROS", "
 disallowed-methods = [
   { path = "std::vec::Vec::new", reason = "size the arena at init: use Vec::with_capacity" },
 ]
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true

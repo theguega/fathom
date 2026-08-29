@@ -25,5 +25,8 @@ mod units;
 pub use calib::{CalibError, Extrinsics, Homography, Intrinsics, look_at};
 pub use color::{Color, ColorMap};
 pub use glam::{Mat3, Mat4, Quat, Vec2, Vec3};
-pub use point::{Camera, CoordFrame, Image, Plane, Point, World, point};
+pub use point::{
+    Camera, CameraPoint, CoordFrame, Image, ImagePoint, Plane, PlanePoint, Point, World,
+    WorldPoint, point,
+};
 pub use units::{FrameIdx, Meters, Radians, Rect, TextScale, Timestamp};

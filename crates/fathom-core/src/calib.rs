@@ -257,7 +257,11 @@ impl Default for Extrinsics {
     }
 }
 
-/// A camera looking at a target, as a ready-made [`Extrinsics`].
+/// A camera at `eye` looking at `target`, as a ready-made [`Extrinsics`].
+///
+/// Builds the OpenCV camera convention: +X right, +Y down, +Z along the view
+/// direction, so [`project`](../fathom_geom/fn.project.html) sees positive
+/// depth in front of the lens.
 ///
 /// Convenience for examples and quick overlays; a calibrated rig uses
 /// [`Extrinsics::from_world_to_camera`] with numbers from OpenCV or Kalibr.
@@ -268,12 +272,22 @@ impl Default for Extrinsics {
 /// to the view direction.
 pub fn look_at(eye: Vec3, target: Vec3, up: Vec3) -> Result<Extrinsics, CalibError> {
     let fwd = target - eye;
-    if fwd.length_squared() < 1e-20
-        || fwd.normalize().cross(up.normalize()).length_squared() < 1e-12
-    {
+    if fwd.length_squared() < 1e-20 || up.length_squared() < 1e-20 {
         return Err(CalibError::Singular);
     }
-    Extrinsics::from_world_to_camera(Mat4::look_at_rh(eye, target, up))
+    let z = fwd.normalize();
+    let x = z.cross(up);
+    if x.length_squared() < 1e-12 {
+        return Err(CalibError::Singular);
+    }
+    let x = x.normalize();
+    let y = z.cross(x);
+    Extrinsics::from_camera_to_world(Mat4::from_cols(
+        x.extend(0.0),
+        y.extend(0.0),
+        z.extend(0.0),
+        eye.extend(1.0),
+    ))
 }
 
 #[cfg(test)]
