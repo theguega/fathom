@@ -27,14 +27,21 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: mdbook }
 
+      # --dest-dir resolves against the working directory, not the book root:
+      # `../site` lands one level above the repository, outside what
+      # upload-pages-artifact collects, and the book silently never ships.
       - name: build the book
-        run: mdbook build book --dest-dir ../site
+        run: mdbook build book --dest-dir site
 
       - name: build the api docs
         run: |
           cargo doc --workspace --no-deps --all-features
           mkdir -p site/api
           cp -r target/doc site/api/rust
+          # cargo doc writes no root index for a workspace, so /api/rust/ would
+          # 404 on its own. Send it to the umbrella crate, which is the one
+          # anybody arriving there is looking for.
+          echo '<meta http-equiv="refresh" content="0; url=fathom/index.html">' > site/api/rust/index.html
 
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
