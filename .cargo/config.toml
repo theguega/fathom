@@ -1,6 +1,9 @@
 [alias]
-xtask = "run --package xtask --"
 lint = "clippy --workspace --all-targets --all-features -- -D warnings"
+
+# Note: RUSTFLAGS in the environment *replaces* the rustflags below rather than
+# adding to them, so a one-off `RUSTFLAGS=... cargo build` on macOS must repeat
+# the link args or the extension module will fail to link.
 
 # `fathom-py` builds with pyo3's `extension-module`, which deliberately does not
 # link libpython: the interpreter provides those symbols at import time. macOS
