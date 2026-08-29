@@ -5,6 +5,10 @@
 //! Anyone needing URDF parsing, IK or dynamics reaches for `k` or `kinetix` in
 //! their own crate and passes the result in. That boundary is the point.
 //!
+//! Six revolute joints and a two-finger gripper, which is the shape of the arms
+//! this was built against. Read the offsets and axes out of your URDF once at
+//! startup and this loop is the whole of your viewer-side kinematics.
+//!
 //! Run with `cargo run -p fathom --example fk_minimal`.
 #![allow(
     clippy::cast_precision_loss,
@@ -36,19 +40,40 @@ fn fk(joints: &[f32], chain: &[Link], out: &mut Vec<Mat4>) {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // A WAM-ish 7-DOF chain: alternating axes, 15cm links.
-    let chain: Vec<Link> = (0..7)
-        .map(|i| Link {
-            fixed: Mat4::from_translation(Vec3::new(0.0, 0.15, 0.0)),
-            axis: if i % 2 == 0 { Vec3::Y } else { Vec3::X },
-        })
-        .collect();
+    // A six-axis arm: shoulder yaw and pitch, elbow, then a three-axis wrist.
+    // These are the numbers you would read out of a URDF's <origin> and <axis>.
+    let chain = [
+        Link {
+            fixed: Mat4::from_translation(Vec3::new(0.00, 0.00, 0.07)),
+            axis: Vec3::Z,
+        },
+        Link {
+            fixed: Mat4::from_translation(Vec3::new(0.02, 0.03, 0.05)),
+            axis: Vec3::Y,
+        },
+        Link {
+            fixed: Mat4::from_translation(Vec3::new(0.28, 0.00, 0.00)),
+            axis: Vec3::NEG_Y,
+        },
+        Link {
+            fixed: Mat4::from_translation(Vec3::new(0.24, 0.00, 0.06)),
+            axis: Vec3::Y,
+        },
+        Link {
+            fixed: Mat4::from_translation(Vec3::new(0.07, 0.03, 0.04)),
+            axis: Vec3::Z,
+        },
+        Link {
+            fixed: Mat4::from_translation(Vec3::new(0.04, 0.00, -0.05)),
+            axis: Vec3::X,
+        },
+    ];
 
     let mut links: Vec<Mat4> = Vec::with_capacity(chain.len());
 
     common::run("fathom - fk_minimal", Meters(2.0), move |ctx, input| {
-        let joints: Vec<f32> = (0..7)
-            .map(|i| (input.time * (0.6 + i as f32 * 0.15)).sin() * 0.6)
+        let joints: Vec<f32> = (0..chain.len())
+            .map(|i| (input.time * (0.5 + i as f32 * 0.13)).sin() * 0.5)
             .collect();
         fk(&joints, &chain, &mut links);
 
