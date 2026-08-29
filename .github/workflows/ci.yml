@@ -47,6 +47,23 @@ jobs:
       - run: cargo nextest run --workspace --all-features
       - run: cargo test --workspace --doc --all-features
 
+  nightly:
+    runs-on: ubuntu-latest
+    continue-on-error: true   # nightly breaks; that is information, not a gate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+      - name: install a software Vulkan device
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mesa-vulkan-drivers vulkan-tools libvulkan1
+      - run: cargo test --workspace --all-features
+      # The next-generation trait solver, ahead of it becoming the default.
+      - run: cargo test --workspace --all-features
+        env:
+          RUSTFLAGS: -Znext-solver=globally
+
   msrv:
     runs-on: ubuntu-latest
     steps:

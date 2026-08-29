@@ -51,7 +51,7 @@ impl Camera {
     /// on its image.
     ///
     /// Takes the same [`Intrinsics`] and [`Extrinsics`] that
-    /// [`project`](fathom_geom::project) takes, so an overlay drawn in 3D and a
+    /// `fathom_geom::project` takes, so an overlay drawn in 3D and a
     /// point projected in 2D land on the same pixel. Lens distortion is *not*
     /// applied - a projection matrix cannot express it - so on a wide lens the
     /// corners drift; project the points yourself when that matters.
@@ -261,8 +261,8 @@ mod tests {
             let clip = cam.view_proj() * world.extend(1.0);
             let ndc = clip.truncate() / clip.w;
             // Same pixel, reached two different ways.
-            let sx = (ndc.x + 1.0) * 0.5 * 640.0;
-            let sy = (1.0 - ndc.y) * 0.5 * 480.0;
+            let sx = (ndc.x + 1.0) * (640.0 / 2.0);
+            let sy = (1.0 - ndc.y) * (480.0 / 2.0);
             assert!((sx - px.0.x).abs() < 0.05, "x: {sx} vs {}", px.0.x);
             assert!((sy - px.0.y).abs() < 0.05, "y: {sy} vs {}", px.0.y);
         }

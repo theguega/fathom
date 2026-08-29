@@ -22,6 +22,11 @@
 //! # }
 //! ```
 #![deny(missing_docs)]
+// Auto-trait queries on wgpu handles walk deep into wgpu_core's own type graph
+// - `Device` to `Global` to `Hub` to a `Registry` of `CommandBuffer` - and hit
+// the default limit before reaching an answer. Nothing here requires `Send`;
+// the query comes from downstream, so the limit is raised where the types are.
+#![recursion_limit = "256"]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod batch;

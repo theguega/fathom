@@ -14,6 +14,9 @@ name       = "fathom"
 # cdylib only: an rlib named `fathom` collides with the umbrella crate's,
 # and nothing links this one as a Rust library.
 crate-type = ["cdylib"]
+# The Python surface is documented from the docstrings and the .pyi stubs, not
+# by rustdoc, and this lib shares its name with the umbrella crate.
+doc = false
 
 [dependencies]
 fathom-core   = { workspace = true }

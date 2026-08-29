@@ -20,6 +20,9 @@
 // The doc comments in this crate become Python docstrings verbatim, so they use
 // Python's names and Python's punctuation rather than rustdoc markup.
 #![allow(clippy::doc_markdown)]
+// `#[pyclass(from_py_object)]` generates a `clone` for `Copy` pyclasses. The
+// lint is looking at pyo3's expansion, not at anything written here.
+#![allow(clippy::clone_on_copy)]
 
 mod convert;
 mod draw;

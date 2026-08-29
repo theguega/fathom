@@ -159,7 +159,8 @@ impl Ctx {
                 .first()
                 .copied()
                 .unwrap_or(wgpu::CompositeAlphaMode::Auto),
-            view_formats: Vec::with_capacity(0),
+            #[allow(clippy::disallowed_methods)] // the ban is on draw paths; this runs once, at init
+            view_formats: Vec::new(),
         };
         surface.configure(&device, &config);
 

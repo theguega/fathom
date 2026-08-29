@@ -97,7 +97,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         // --- the producer, standing in for a decode thread ------------------
         for (i, texel) in rgba.chunks_exact_mut(4).enumerate() {
             let (x, y) = ((i as u32 % 160) as f32, (i as u32 / 160) as f32);
-            let wave = ((x * 0.05 + secs * 2.0).sin() * (y * 0.05 - secs).cos() + 1.0) * 0.5;
+            // A sine product is [-1, 1]; remap it to [0, 1] for a colour channel.
+            let wave = ((x * 0.05 + secs * 2.0).sin() * (y * 0.05 - secs).cos()).mul_add(0.5, 0.5);
             texel.copy_from_slice(&[
                 (wave * 255.0) as u8,
                 (x / 160.0 * 255.0) as u8,

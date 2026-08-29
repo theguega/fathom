@@ -14,7 +14,7 @@ use crate::Ctx;
 /// Byte layout of pixel data handed to [`upload_texture`].
 ///
 /// Single-channel data is deliberately absent: a depth or attention map becomes
-/// RGBA through [`colormap_into`](fathom_geom::colormap_into) first, which is
+/// RGBA through `fathom_geom::colormap_into` first, which is
 /// the same one-line step that makes it *readable*.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[non_exhaustive]
