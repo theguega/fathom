@@ -10,7 +10,7 @@ one set of composable drawing primitives, no framework.
 [![ci](https://github.com/theguega/fathom/actions/workflows/ci.yml/badge.svg)](https://github.com/theguega/fathom/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/fathom.svg)](https://crates.io/crates/fathom)
 [![docs.rs](https://img.shields.io/docsrs/fathom)](https://docs.rs/fathom)
-[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#license)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
 
 </div>
 
@@ -247,4 +247,4 @@ adapter.
 
 ## License
 
-MIT OR Apache-2.0, at your option.
+MIT. See [LICENSE-MIT](LICENSE-MIT).

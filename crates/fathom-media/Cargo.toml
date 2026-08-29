@@ -1,14 +1,19 @@
 [package]
-name         = "fathom-media"
-description  = "The mp4 export sink for fathom: raw frames in, encoded video out."
-version.workspace      = true
-edition.workspace      = true
+name = "fathom-media"
+description = "The mp4 export sink for fathom: raw frames in, encoded video out."
+version.workspace = true
+edition.workspace = true
 rust-version.workspace = true
-license.workspace      = true
-repository.workspace   = true
-readme       = "README.md"
-keywords     = ["visualization", "video", "encode", "ffmpeg"]
-categories   = ["multimedia::video"]
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["visualization", "video", "encode", "ffmpeg"]
+categories = ["multimedia::video"]
+
+[lib]
+# Only the criterion targets are benchmarks; without this cargo also runs the
+# lib test harness as one, and it rejects criterion's flags.
+bench = false
 
 [dependencies]
 

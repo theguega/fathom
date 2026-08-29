@@ -1,25 +1,32 @@
 [package]
-name         = "fathom-render"
-description  = "The wgpu backend and drawing primitives for fathom."
-version.workspace      = true
-edition.workspace      = true
+name = "fathom-render"
+description = "The wgpu backend and drawing primitives for fathom."
+version.workspace = true
+edition.workspace = true
 rust-version.workspace = true
-license.workspace      = true
-repository.workspace   = true
-readme       = "README.md"
-keywords     = ["visualization", "wgpu", "immediate-mode", "robotics"]
-categories   = ["graphics", "rendering"]
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["visualization", "wgpu", "immediate-mode", "robotics"]
+categories = ["graphics", "rendering"]
+
+[lib]
+# Only the criterion targets are benchmarks; without this cargo also runs the
+# lib test harness as one, and it rejects criterion's flags.
+bench = false
 
 [dependencies]
 fathom-core = { workspace = true }
-bytemuck    = { workspace = true }
-glam        = { workspace = true }
-pollster    = { workspace = true }
-wgpu        = { workspace = true }
+bytemuck = { workspace = true }
+glam = { workspace = true }
+pollster = { workspace = true }
+wgpu = { workspace = true }
 
 [dev-dependencies]
 bytemuck = { workspace = true }
-criterion = { version = "0.7", default-features = false, features = ["cargo_bench_support"] }
+criterion = { version = "0.7", default-features = false, features = [
+  "cargo_bench_support",
+] }
 fathom-geom = { workspace = true }
 
 [lints]

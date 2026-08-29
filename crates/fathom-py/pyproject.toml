@@ -6,11 +6,11 @@ build-backend = "maturin"
 name = "fathom"
 description = "A low-level, zero-overhead visualization library for multimodal spatiotemporal data."
 requires-python = ">=3.10"
-license = { text = "MIT OR Apache-2.0" }
+license = { text = "MIT" }
 classifiers = [
-    "Programming Language :: Rust",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering :: Visualization",
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = ["numpy>=1.23"]
 dynamic = ["version"]

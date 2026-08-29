@@ -1,0 +1,22 @@
+[package]
+name = "book-tests"
+description = "Compiles every Rust snippet in the book against the real crate."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+bench = false
+doc = false
+
+[dev-dependencies]
+# The book shows `bytemuck::cast_slice` for handing a `&[Color]` to
+# `upload_texture`, which is what a reader would have to do.
+bytemuck = { workspace = true }
+fathom = { path = "../fathom", features = ["media"] }
+
+[lints]
+workspace = true

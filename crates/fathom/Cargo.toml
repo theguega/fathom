@@ -1,30 +1,35 @@
 [package]
-name         = "fathom"
-description  = "A low-level, zero-overhead visualization library for multimodal spatiotemporal data."
-version.workspace      = true
-edition.workspace      = true
+name = "fathom"
+description = "A low-level, zero-overhead visualization library for multimodal spatiotemporal data."
+version.workspace = true
+edition.workspace = true
 rust-version.workspace = true
-license.workspace      = true
-repository.workspace   = true
-readme       = "README.md"
-keywords     = ["visualization", "robotics", "pointcloud", "debugging"]
-categories   = ["graphics", "visualization", "science::robotics"]
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["visualization", "robotics", "pointcloud", "debugging"]
+categories = ["graphics", "visualization", "science::robotics"]
 
 [features]
 default = []
 ## mp4 export. Spawns the `ffmpeg` binary; links no C libraries.
 media = ["dep:fathom-media"]
 
+[lib]
+# Only the criterion targets are benchmarks; without this cargo also runs the
+# lib test harness as one, and it rejects criterion's flags.
+bench = false
+
 [dependencies]
-fathom-core   = { workspace = true }
-fathom-geom   = { workspace = true }
-fathom-media  = { workspace = true, optional = true }
+fathom-core = { workspace = true }
+fathom-geom = { workspace = true }
+fathom-media = { workspace = true, optional = true }
 fathom-render = { workspace = true }
 
 [dev-dependencies]
 bytemuck = { workspace = true }
 trybuild = "1"
-winit    = { workspace = true }
+winit = { workspace = true }
 
 [lints]
 workspace = true

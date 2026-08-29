@@ -12,3 +12,4 @@ frames.rgba
 __pycache__/
 *.py[cod]
 .pytest_cache/
+book/book/

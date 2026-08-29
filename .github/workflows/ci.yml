@@ -12,7 +12,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with: { components: rustfmt }
+      # imports_granularity and group_imports are nightly-only; on stable
+      # rustfmt ignores them and the check passes without having applied them.
       - run: cargo fmt --all --check
+        env:
+          RUSTUP_TOOLCHAIN: nightly
       - uses: taiki-e/install-action@v2
         with: { tool: taplo-cli }
       - run: taplo fmt --check
@@ -59,9 +63,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mesa-vulkan-drivers vulkan-tools libvulkan1
       - run: cargo test --workspace --all-features
+        env:
+          RUSTUP_TOOLCHAIN: nightly
       # The next-generation trait solver, ahead of it becoming the default.
       - run: cargo test --workspace --all-features
         env:
+          RUSTUP_TOOLCHAIN: nightly
           RUSTFLAGS: -Znext-solver=globally
 
   msrv:
@@ -75,6 +82,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RUSTDOCFLAGS: -D warnings -D rustdoc::broken_intra_doc_links --cfg docsrs
+      # rust-toolchain.toml pins 1.97.1 and wins over the action's choice;
+      # RUSTUP_TOOLCHAIN is what actually overrides it. Without this the job
+      # runs on stable and `#![feature(doc_cfg)]` is rejected.
+      RUSTUP_TOOLCHAIN: nightly
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
@@ -88,10 +99,11 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with: { tool: mdbook }
-      # Compiles every ```rust block in the book against the real crate, so the
-      # guide cannot drift from the API any more than a doctest can.
-      - run: cargo build --workspace --all-features
-      - run: mdbook test book -L target/debug/deps
+      # Every Rust code block in the book is a doctest of the book-tests crate,
+      # so the guide cannot drift from the API. `mdbook test` cannot do this:
+      # it has no --extern and its doctests default to edition 2015.
+      - run: cargo test -p book-tests --doc
+      - run: mdbook build book
 
   python:
     runs-on: ubuntu-latest
@@ -106,11 +118,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mesa-vulkan-drivers vulkan-tools libvulkan1
       - run: pip install maturin numpy pytest
-      - run: maturin develop -m crates/fathom-py/Cargo.toml
-      - run: python -m pytest crates/fathom-py/tests -v
+      # `maturin develop` installs into a virtualenv and refuses without one.
+      - run: python -m venv .venv
+      - run: .venv/bin/pip install numpy pytest
+      - run: .venv/bin/maturin develop --release -m crates/fathom-py/Cargo.toml
+        env:
+          VIRTUAL_ENV: ${{ github.workspace }}/.venv
+      - run: .venv/bin/python -m pytest crates/fathom-py/tests -v
       # The stubs are checked in, so a signature change that does not reach them
       # is a diff, not a surprise for editors and mypy downstream.
-      - run: pip install mypy && mypy --strict crates/fathom-py/fathom.pyi
+      - run: .venv/bin/pip install mypy && .venv/bin/mypy --strict crates/fathom-py/fathom.pyi
 
   deny:
     runs-on: ubuntu-latest
@@ -118,11 +135,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: EmbarkStudios/cargo-deny-action@v2
 
-  semver:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: obi1kenobi/cargo-semver-checks-action@v2
+  # No `semver` job yet: cargo-semver-checks compares against the released
+  # version on crates.io, and there is not one. It goes in with the first
+  # publish, where it matters most - fathom-core is what every adapter pins.
 
   coverage:
     runs-on: ubuntu-latest

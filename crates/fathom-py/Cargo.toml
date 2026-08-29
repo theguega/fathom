@@ -1,16 +1,19 @@
 [package]
-name         = "fathom-py"
-description  = "Python bindings for fathom."
-version.workspace      = true
-edition.workspace      = true
+name = "fathom-py"
+description = "Python bindings for fathom."
+version.workspace = true
+edition.workspace = true
 rust-version.workspace = true
-license.workspace      = true
-repository.workspace   = true
-readme       = "README.md"
-publish      = false
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+publish = false
 
 [lib]
-name       = "fathom"
+# Only the criterion targets are benchmarks; without this cargo also runs the
+# lib test harness as one, and it rejects criterion\'s flags.
+bench = false
+name = "fathom"
 # cdylib only: an rlib named `fathom` collides with the umbrella crate's,
 # and nothing links this one as a Rust library.
 crate-type = ["cdylib"]
@@ -19,14 +22,14 @@ crate-type = ["cdylib"]
 doc = false
 
 [dependencies]
-fathom-core   = { workspace = true }
-fathom-geom   = { workspace = true }
+fathom-core = { workspace = true }
+fathom-geom = { workspace = true }
 fathom-render = { workspace = true }
-bytemuck      = { workspace = true }
-glam          = { workspace = true }
-numpy         = "0.29"
-pyo3          = { version = "0.29", features = ["abi3-py310", "extension-module"] }
-winit         = { workspace = true }
+bytemuck = { workspace = true }
+glam = { workspace = true }
+numpy = "0.29"
+pyo3 = { version = "0.29", features = ["abi3-py310", "extension-module"] }
+winit = { workspace = true }
 
 [lints]
 workspace = true

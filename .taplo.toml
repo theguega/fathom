@@ -1,0 +1,3 @@
+# taplo formats every .toml it finds, which would include the manifests cargo
+# generates under target/ for trybuild's scratch crates.
+exclude = ["target/**"]

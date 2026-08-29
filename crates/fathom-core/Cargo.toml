@@ -1,18 +1,23 @@
 [package]
-name         = "fathom-core"
-description  = "Shared types for fathom: coordinate-framed points, colors, rects, timestamps, calibration."
-version.workspace      = true
-edition.workspace      = true
+name = "fathom-core"
+description = "Shared types for fathom: coordinate-framed points, colors, rects, timestamps, calibration."
+version.workspace = true
+edition.workspace = true
 rust-version.workspace = true
-license.workspace      = true
-repository.workspace   = true
-readme       = "README.md"
-keywords     = ["visualization", "robotics", "graphics"]
-categories   = ["graphics", "science::robotics"]
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["visualization", "robotics", "graphics"]
+categories = ["graphics", "science::robotics"]
+
+[lib]
+# Only the criterion targets are benchmarks; without this cargo also runs the
+# lib test harness as one, and it rejects criterion's flags.
+bench = false
 
 [dependencies]
 bytemuck = { workspace = true }
-glam     = { workspace = true }
+glam = { workspace = true }
 
 [lints]
 workspace = true
