@@ -7,3 +7,7 @@ allow-unwrap-in-tests = true
 allow-expect-in-tests = true
 allow-panic-in-tests = true
 allow-indexing-slicing-in-tests = true
+
+# `draw_*(f: &mut Frame, ...)` and `draw_*(s: &mut Scene, ...)` are the API's
+# own shape, and short names are idiomatic in the maths around them.
+single-char-binding-names-threshold = 8

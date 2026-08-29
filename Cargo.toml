@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/fathom-core", "crates/fathom-geom"]
+members = ["crates/fathom-core", "crates/fathom-geom", "crates/fathom-render"]
 resolver = "3"
 
 [workspace.package]
@@ -16,7 +16,7 @@ fathom-render = { version = "0.1.0", path = "crates/fathom-render" }
 fathom-media  = { version = "0.1.0", path = "crates/fathom-media" }
 
 glam      = { version = "0.30", features = ["bytemuck"] }
-wgpu      = "26"
+wgpu      = { version = "26", default-features = false, features = ["wgsl", "metal", "vulkan", "dx12"] }
 winit     = "0.30"
 bytemuck  = { version = "1", features = ["derive"] }
 pollster  = "0.4"

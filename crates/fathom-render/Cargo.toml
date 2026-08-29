@@ -17,6 +17,9 @@ glam        = { workspace = true }
 pollster    = { workspace = true }
 wgpu        = { workspace = true }
 
+[dev-dependencies]
+fathom-geom = { workspace = true }
+
 [lints]
 workspace = true
 

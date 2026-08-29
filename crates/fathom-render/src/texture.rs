@@ -27,6 +27,7 @@ pub enum Format {
 
 impl Format {
     #[inline]
+    #[allow(clippy::unused_self)] // stays a method: a one-byte format would read it
     const fn bytes_per_pixel(self) -> u32 {
         4
     }
@@ -34,8 +35,8 @@ impl Format {
     #[inline]
     const fn wgpu(self) -> wgpu::TextureFormat {
         match self {
-            Self::Rgba8 => wgpu::TextureFormat::Rgba8UnormSrgb,
-            Self::Bgra8 => wgpu::TextureFormat::Bgra8UnormSrgb,
+            Self::Rgba8 => wgpu::TextureFormat::Rgba8Unorm,
+            Self::Bgra8 => wgpu::TextureFormat::Bgra8Unorm,
             // `Format` is `#[non_exhaustive]`; nothing else exists yet.
         }
     }
@@ -83,6 +84,7 @@ impl std::error::Error for TextureError {}
 /// same GPU allocation, so a caller can keep one per stream and hand copies
 /// around without thinking about it.
 #[derive(Clone, Debug)]
+#[allow(clippy::struct_field_names)] // `texture` is the wgpu handle; the wrapper is the fathom one
 pub struct Texture {
     queue: Arc<wgpu::Queue>,
     texture: wgpu::Texture,
