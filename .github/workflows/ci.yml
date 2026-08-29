@@ -63,6 +63,19 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo doc --workspace --no-deps --all-features
 
+  book:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.97.1
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: mdbook }
+      # Compiles every ```rust block in the book against the real crate, so the
+      # guide cannot drift from the API any more than a doctest can.
+      - run: cargo build --workspace --all-features
+      - run: mdbook test book -L target/debug/deps
+
   deny:
     runs-on: ubuntu-latest
     steps:

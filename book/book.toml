@@ -1,0 +1,11 @@
+[book]
+title = "fathom"
+description = "A low-level, zero-overhead visualization library for multimodal spatiotemporal data."
+authors = ["fathom contributors"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/theguega/fathom"
