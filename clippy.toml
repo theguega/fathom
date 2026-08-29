@@ -1,0 +1,5 @@
+avoid-breaking-exported-api = false
+doc-valid-idents = ["MCAP", "LeRobot", "OpenCV", "Kalibr", "RealSense", "ROS", "PyO3", "..", "GPU", "CPU", "VRAM", "sRGB", "wgpu", "winit", "glam", "ffmpeg", "mp4"]
+disallowed-methods = [
+  { path = "std::vec::Vec::new", reason = "size the arena at init: use Vec::with_capacity" },
+]
