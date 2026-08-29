@@ -1,3 +1,6 @@
 /target
 frames.rgba
 *.mp4
+
+# macOS Finder metadata; it is what kept an empty xtask/ alive
+.DS_Store
