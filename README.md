@@ -208,6 +208,9 @@ while r.poll():
 Non-contiguous input raises rather than silently copying — including
 Fortran-ordered arrays, which would otherwise be silently transposed.
 
+Building it, running the examples, and the API in more detail:
+**[`python/README.md`](python/README.md)**.
+
 ## Examples
 
 ```sh

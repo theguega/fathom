@@ -4,3 +4,11 @@ frames.rgba
 
 # macOS Finder metadata; it is what kept an empty xtask/ alive
 .DS_Store
+
+# local dev environment for the python bindings
+.venv/
+
+# python build artefacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
