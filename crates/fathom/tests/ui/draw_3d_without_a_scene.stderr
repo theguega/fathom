@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/ui/draw_3d_without_a_scene.rs:6:18
+  |
+6 |     draw_line_3d(&mut f, WorldPoint::ORIGIN, WorldPoint::ORIGIN, Color::RED);
+  |     ------------ ^^^^^^ expected `&mut Scene<'_, '_>`, found `&mut Frame<'_>`
+  |     |
+  |     arguments to this function are incorrect
+  |
+  = note: expected mutable reference `&mut Scene<'_, '_>`
+             found mutable reference `&mut Frame<'_>`
+note: function defined here
+ --> $WORKSPACE/crates/fathom-render/src/draw3d.rs
+  |
+  | pub fn draw_line_3d(s: &mut Scene<'_, '_>, a: WorldPoint, b: WorldPoint, color: Color) {
+  |        ^^^^^^^^^^^^

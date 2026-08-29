@@ -16,7 +16,8 @@ fathom-geom   = { workspace = true }
 fathom-render = { workspace = true }
 
 [dev-dependencies]
-winit = { workspace = true }
+trybuild = "1"
+winit    = { workspace = true }
 
 [lints]
 workspace = true

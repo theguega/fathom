@@ -13,7 +13,12 @@
 //! ```
 //!
 //! Run with `cargo run -p fathom --example headless_export`.
-#![allow(clippy::cast_precision_loss)] // example code: every cast here is small and deliberate
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+//  ^ example code: every cast here is small and deliberate
 
 use std::{error::Error, fs::File, io::Write as _, num::NonZeroU32};
 
@@ -37,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut ee_path: Vec<WorldPoint> = Vec::with_capacity(FRAMES as usize);
     let mut colored: Vec<(WorldPoint, Color)> = Vec::with_capacity(FRAMES as usize);
     let mut plot: Vec<ImagePoint> = Vec::with_capacity(FRAMES as usize);
-    let mut joint0: Vec<f32> = Vec::with_capacity(FRAMES as usize);
+    let mut history: Vec<f32> = Vec::with_capacity(FRAMES as usize);
 
     let mut out = File::create("frames.rgba")?;
 
@@ -63,7 +68,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             (secs * 1.3).sin() * 0.15 + 0.2,
             (secs * 0.7).sin() * 0.4,
         ));
-        joint0.push(joints[0]);
+        history.push(joints.first().copied().unwrap_or(0.0));
         orbit.rotate(0.01, 0.0);
 
         // --- the draw code, byte for byte what the live viewer runs ---------
@@ -85,7 +90,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let plot_rect = Rect::new(left.x + 16.0, left.bottom() - 96.0, left.w - 32.0, 80.0);
         draw_bbox(&mut f, plot_rect, Color::rgb(50, 50, 60));
         plot.clear();
-        plot.extend(joint0.iter().enumerate().map(|(i, &v)| {
+        plot.extend(history.iter().enumerate().map(|(i, &v)| {
             ImagePoint::new(
                 plot_rect.x + plot_rect.w * i as f32 / FRAMES as f32,
                 plot_rect.y + plot_rect.h * 0.5 - v * plot_rect.h * 0.45,

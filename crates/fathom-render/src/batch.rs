@@ -45,10 +45,12 @@ pub(crate) struct Batcher {
     peak: usize,
 }
 
-/// Vertices per arena, and so per GPU chunk buffer. 64k vertices is 1.75MB,
-/// which holds a 10k-point cloud plus a full HUD without ever reaching for a
-/// second chunk.
-pub(crate) const DEFAULT_ARENA: usize = 64 * 1024;
+/// Vertices per arena, and so per GPU chunk buffer.
+///
+/// 256k vertices is 7MB: enough for a 40k-point cloud plus a full HUD without
+/// ever reaching for a second chunk, and the number the 1ms packing budget is
+/// stated against. Fixed at startup, never grown.
+pub(crate) const DEFAULT_ARENA: usize = 256 * 1024;
 
 impl Batcher {
     pub(crate) fn new(capacity: usize) -> Self {

@@ -7,7 +7,12 @@
 //! written against `fathom-core` alone, without ever depending on the renderer.
 //!
 //! Run with `cargo run -p fathom --example adapter_stub`.
-#![allow(clippy::cast_precision_loss)] // example code: every cast here is small and deliberate
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+//  ^ example code: every cast here is small and deliberate
 
 use std::error::Error;
 

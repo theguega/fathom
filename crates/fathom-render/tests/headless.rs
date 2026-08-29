@@ -173,7 +173,7 @@ fn a_frame_that_overflows_the_arena_still_draws_everything() {
 
     // Far more segments than the 64k-vertex arena holds, forcing the overflow
     // path: nothing may be dropped, and the last segment must still appear.
-    let path: Vec<WorldPoint> = (0..80_000u32)
+    let path: Vec<WorldPoint> = (0..300_000u32)
         .map(|i| {
             let t = f32::from(u16::try_from(i % 1000).unwrap_or(0)) / 1000.0;
             WorldPoint::new(t.mul_add(2.0, -1.0), 0.0, 0.0)
@@ -197,7 +197,7 @@ fn a_frame_that_overflows_the_arena_still_draws_everything() {
     f.end();
 
     assert!(
-        ctx.peak_vertices() > 64 * 1024,
+        ctx.peak_vertices() > 256 * 1024,
         "this frame should have spilled past one chunk, packed {}",
         ctx.peak_vertices()
     );

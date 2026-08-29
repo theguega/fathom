@@ -1,0 +1,15 @@
+error[E0382]: use of moved value: `f`
+ --> tests/ui/end_a_frame_twice.rs:7:5
+  |
+5 |     let f = begin_frame(ctx);
+  |         - move occurs because `f` has type `Frame<'_>`, which does not implement the `Copy` trait
+6 |     f.end();
+  |       ----- `f` moved due to this method call
+7 |     f.end();
+  |     ^ value used here after move
+  |
+note: `Frame::<'a>::end` takes ownership of the receiver `self`, which moves `f`
+ --> $WORKSPACE/crates/fathom-render/src/frame.rs
+  |
+  |     pub fn end(mut self) {
+  |                    ^^^^

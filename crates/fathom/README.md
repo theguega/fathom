@@ -46,6 +46,29 @@ Coordinate frames are types. `Point<World>`, `Point<Camera>`, `Point<Image>` and
 tag, so an extrinsics mix-up is a compile error rather than an overlay that is
 subtly wrong in a way you notice three days later.
 
+## The budget, as a number
+
+Measured on an M-series laptop, `cargo bench`:
+
+| | |
+|---|---|
+| Pack 100k vertices (`draw_line_strip_3d`) | 350 µs |
+| Pack 100k vertices (`draw_points_3d`, billboarded) | 389 µs |
+| Pack 1k glyphs of text | 53 µs |
+| `project` 100k points, no distortion | 224 µs |
+| `project` 100k points, Brown-Conrady | 224 µs |
+| `colormap_into` over 1M values (Turbo) | 2.6 ms |
+
+The stated target is under 1 ms of CPU to pack 100k vertices, with one submit
+per frame. Distortion costs nothing measurable because it is applied
+unconditionally: undistorted intrinsics carry all-zero coefficients, for which
+the polynomial is the identity, so there is no branch in the hot path.
+
+Two tests hold the line mechanically rather than by review: a counting global
+allocator asserts **zero heap allocations** between the first draw call and the
+last, and `trybuild` asserts that each of the type guarantees is still a
+compile error.
+
 ## Crates
 
 | Crate | What it is |

@@ -10,7 +10,12 @@
 //! concept of a "source".
 //!
 //! Run with `cargo run -p fathom --example live_viewer`.
-#![allow(clippy::cast_precision_loss)] // example code: every cast here is small and deliberate
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
+//  ^ example code: every cast here is small and deliberate
 
 use std::{
     error::Error,
@@ -49,10 +54,8 @@ fn spawn_producer() -> mpsc::Receiver<Sample> {
         loop {
             let secs = start.elapsed().as_secs_f32();
             for (i, texel) in rgba.chunks_exact_mut(4).enumerate() {
-                #[allow(clippy::cast_possible_truncation)]
                 let (x, y) = ((i as u32 % CAM_W) as f32, (i as u32 / CAM_W) as f32);
                 let wave = ((x * 0.05 + secs * 2.0).sin() * (y * 0.05 - secs).cos() + 1.0) * 0.5;
-                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
                 texel.copy_from_slice(&[
                     (wave * 255.0) as u8,
                     (x / CAM_W as f32 * 255.0) as u8,
@@ -310,14 +313,12 @@ impl ApplicationHandler for Viewer {
                 let (dx, dy) = (position.x - self.cursor.0, position.y - self.cursor.1);
                 self.cursor = (position.x, position.y);
                 if self.dragging {
-                    #[allow(clippy::cast_possible_truncation)]
                     self.orbit.rotate(-dx as f32 * 0.01, -dy as f32 * 0.01);
                 }
             }
             WindowEvent::MouseWheel { delta, .. } => {
                 let notches = match delta {
                     MouseScrollDelta::LineDelta(_, y) => y,
-                    #[allow(clippy::cast_possible_truncation)]
                     MouseScrollDelta::PixelDelta(p) => p.y as f32 * 0.05,
                 };
                 self.orbit.zoom(-notches);
