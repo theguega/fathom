@@ -76,6 +76,25 @@ jobs:
       - run: cargo build --workspace --all-features
       - run: mdbook test book -L target/debug/deps
 
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.97.1
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: Swatinem/rust-cache@v2
+      - name: install a software Vulkan device
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mesa-vulkan-drivers vulkan-tools libvulkan1
+      - run: pip install maturin numpy pytest
+      - run: maturin develop -m crates/fathom-py/Cargo.toml
+      - run: python -m pytest crates/fathom-py/tests -v
+      # The stubs are checked in, so a signature change that does not reach them
+      # is a diff, not a surprise for editors and mypy downstream.
+      - run: pip install mypy && mypy --strict crates/fathom-py/fathom.pyi
+
   deny:
     runs-on: ubuntu-latest
     steps:

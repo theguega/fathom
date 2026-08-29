@@ -2,24 +2,36 @@
 
 use core::fmt;
 
-/// A packed, non-premultiplied sRGB color: `0xRRGGBBAA`.
+/// A non-premultiplied sRGB color, stored as `[r, g, b, a]`.
 ///
-/// `#[repr(transparent)]` over `u32`, so a `&[Color]` uploads to the GPU with
-/// no conversion step.
+/// `#[repr(transparent)]` over `[u8; 4]` rather than over a `u32`, and that
+/// choice is load-bearing: it means `bytemuck::cast_slice(&colors)` yields
+/// bytes in red-green-blue-alpha order on every target, so the output of
+/// [`colormap`](../fathom_geom/fn.colormap.html) can be handed straight to
+/// `upload_texture`. Packing into a `u32` would put the channels in memory
+/// backwards on every little-endian machine, which is to say all of them, and
+/// the symptom would be a heatmap with red and blue swapped.
+///
+/// Use [`Color::hex`] when a literal reads better.
 ///
 /// ```
 /// use fathom_core::Color;
 ///
 /// assert_eq!(Color::rgb(255, 0, 0), Color::RED);
+/// assert_eq!(Color::hex(0xFF_00_00_FF), Color::RED);
 /// assert_eq!(Color::RED.with_alpha(0.5).channels(), [255, 0, 0, 128]);
+///
+/// // The reason for the layout: bytes come out in the order a texture wants.
+/// let colors = [Color::RED, Color::GREEN];
+/// assert_eq!(bytemuck::cast_slice::<Color, u8>(&colors), &[255, 0, 0, 255, 0, 255, 0, 255]);
 /// ```
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct Color(pub u32);
+pub struct Color(pub [u8; 4]);
 
 impl Color {
     /// Fully transparent.
-    pub const TRANSPARENT: Self = Self(0x0000_0000);
+    pub const TRANSPARENT: Self = Self([0, 0, 0, 0]);
     /// Opaque black.
     pub const BLACK: Self = Self::rgb(0, 0, 0);
     /// Opaque white.
@@ -50,14 +62,28 @@ impl Color {
     #[inline]
     #[must_use]
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
-        Self(u32::from_be_bytes([r, g, b, a]))
+        Self([r, g, b, a])
     }
 
-    /// Unpack to `[r, g, b, a]`, the byte order the vertex format expects.
+    /// Build a color from a `0xRRGGBBAA` literal.
+    #[inline]
+    #[must_use]
+    pub const fn hex(v: u32) -> Self {
+        Self(v.to_be_bytes())
+    }
+
+    /// The channels as `[r, g, b, a]`, which is also the memory layout.
     #[inline]
     #[must_use]
     pub const fn channels(self) -> [u8; 4] {
-        self.0.to_be_bytes()
+        self.0
+    }
+
+    /// Repack into a `0xRRGGBBAA` integer, for display or hashing.
+    #[inline]
+    #[must_use]
+    pub const fn to_hex(self) -> u32 {
+        u32::from_be_bytes(self.0)
     }
 
     /// Return this color with alpha replaced, `t` clamped to `0.0..=1.0`.
@@ -66,7 +92,8 @@ impl Color {
     pub fn with_alpha(self, a: f32) -> Self {
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let a = (a.clamp(0.0, 1.0) * 255.0 + 0.5) as u8;
-        Self((self.0 & 0xFFFF_FF00) | u32::from(a))
+        let [r, g, b, _] = self.0;
+        Self([r, g, b, a])
     }
 
     /// Linearly interpolate in 8-bit sRGB space, `t` clamped to `0.0..=1.0`.
@@ -91,14 +118,15 @@ impl Color {
 
 impl fmt::Debug for Color {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "#{:08X}", self.0)
+        write!(f, "#{:08X}", self.to_hex())
     }
 }
 
 impl From<u32> for Color {
+    /// From a `0xRRGGBBAA` literal; see [`Color::hex`].
     #[inline]
     fn from(v: u32) -> Self {
-        Self(v)
+        Self::hex(v)
     }
 }
 
@@ -135,6 +163,13 @@ mod tests {
     #[test]
     fn channel_order_is_rgba_in_memory() {
         assert_eq!(Color::rgba(1, 2, 3, 4).channels(), [1, 2, 3, 4]);
+        // The whole reason for the layout: what a texture upload will see.
+        assert_eq!(
+            bytemuck::cast_slice::<Color, u8>(&[Color::rgba(1, 2, 3, 4), Color::rgba(5, 6, 7, 8)]),
+            &[1, 2, 3, 4, 5, 6, 7, 8]
+        );
+        assert_eq!(Color::hex(0x01_02_03_04), Color::rgba(1, 2, 3, 4));
+        assert_eq!(Color::rgba(1, 2, 3, 4).to_hex(), 0x01_02_03_04);
         assert_eq!(
             Color::BLACK.lerp(Color::WHITE, 0.5).channels(),
             [128, 128, 128, 255]

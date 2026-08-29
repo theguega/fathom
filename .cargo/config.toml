@@ -1,3 +1,12 @@
 [alias]
 xtask = "run --package xtask --"
 lint = "clippy --workspace --all-targets --all-features -- -D warnings"
+
+# `fathom-py` builds with pyo3's `extension-module`, which deliberately does not
+# link libpython: the interpreter provides those symbols at import time. macOS
+# needs to be told that is fine; every other platform already allows it.
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]

@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/fathom-core", "crates/fathom-geom", "crates/fathom-render", "crates/fathom-media", "crates/fathom"]
+members = ["crates/fathom-core", "crates/fathom-geom", "crates/fathom-render", "crates/fathom-media", "crates/fathom", "crates/fathom-py"]
 resolver = "3"
 
 [workspace.package]
