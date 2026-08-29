@@ -4,29 +4,41 @@
 //! afterwards, which is what removes the `unwrap` from the projection path:
 //! `project` cannot fail on bad calibration because the type is the proof.
 
+use core::fmt;
+
 use glam::{Mat3, Mat4, Vec3};
-use thiserror::Error;
 
 /// Why a calibration could not be built from the numbers given.
-#[derive(Clone, Copy, Debug, Error, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum CalibError {
     /// A focal length was zero, negative, or not finite.
-    #[error("focal length must be finite and positive")]
     BadFocalLength,
     /// A principal point coordinate was not finite.
-    #[error("principal point must be finite")]
     BadPrincipalPoint,
     /// A distortion coefficient was not finite.
-    #[error("distortion coefficients must be finite")]
     BadDistortion,
     /// The matrix is singular, so it has no inverse and cannot be un-applied.
-    #[error("matrix is singular")]
     Singular,
     /// Building a homography needs at least four non-degenerate correspondences.
-    #[error("need at least 4 correspondences, got {0}")]
     TooFewCorrespondences(usize),
 }
+
+impl fmt::Display for CalibError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::BadFocalLength => f.write_str("focal length must be finite and positive"),
+            Self::BadPrincipalPoint => f.write_str("principal point must be finite"),
+            Self::BadDistortion => f.write_str("distortion coefficients must be finite"),
+            Self::Singular => f.write_str("matrix is singular"),
+            Self::TooFewCorrespondences(n) => {
+                write!(f, "need at least 4 correspondences, got {n}")
+            }
+        }
+    }
+}
+
+impl core::error::Error for CalibError {}
 
 /// Pinhole intrinsics with optional Brown-Conrady distortion.
 ///

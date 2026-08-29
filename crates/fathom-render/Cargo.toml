@@ -1,0 +1,25 @@
+[package]
+name         = "fathom-render"
+description  = "The wgpu backend and drawing primitives for fathom."
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+readme       = "README.md"
+keywords     = ["visualization", "wgpu", "immediate-mode", "robotics"]
+categories   = ["graphics", "rendering"]
+
+[dependencies]
+fathom-core = { workspace = true }
+bytemuck    = { workspace = true }
+glam        = { workspace = true }
+pollster    = { workspace = true }
+wgpu        = { workspace = true }
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]

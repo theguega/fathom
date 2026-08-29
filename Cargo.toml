@@ -19,9 +19,7 @@ glam      = { version = "0.30", features = ["bytemuck"] }
 wgpu      = "26"
 winit     = "0.30"
 bytemuck  = { version = "1", features = ["derive"] }
-thiserror = "2"
 pollster  = "0.4"
-anyhow    = "1"
 
 [workspace.lints.rust]
 missing_docs                  = "deny"

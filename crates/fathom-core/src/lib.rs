@@ -19,6 +19,7 @@
 
 mod calib;
 mod color;
+mod pod;
 mod point;
 mod units;
 

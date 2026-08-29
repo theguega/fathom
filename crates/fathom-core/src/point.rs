@@ -2,8 +2,10 @@
 
 use core::{fmt, marker::PhantomData};
 
-use bytemuck::{Pod, Zeroable};
+use bytemuck::Pod;
 use glam::{Vec2, Vec3};
+
+use crate::pod::pod;
 
 /// A coordinate frame marker.
 ///
@@ -126,15 +128,7 @@ macro_rules! impl_3d {
             pub const ORIGIN: Self = Self::new(0.0, 0.0, 0.0);
         }
 
-        // SAFETY: `Point` is `#[repr(transparent)]` over `Vec3`, which is `Zeroable`;
-        // the `PhantomData` tag is zero-sized so the layouts are identical.
-        #[allow(unsafe_code)]
-        unsafe impl Zeroable for Point<$f> {}
-
-        // SAFETY: `Point` is `#[repr(transparent)]` over `Vec3`, which is `Pod`: it has no
-        // padding, no invalid bit patterns, and the zero-sized tag adds neither.
-        #[allow(unsafe_code)]
-        unsafe impl Pod for Point<$f> {}
+        pod!(Point<$f>, 12);
     )*};
 }
 
@@ -151,15 +145,7 @@ macro_rules! impl_2d {
             pub const ORIGIN: Self = Self::new(0.0, 0.0);
         }
 
-        // SAFETY: `Point` is `#[repr(transparent)]` over `Vec2`, which is `Zeroable`;
-        // the `PhantomData` tag is zero-sized so the layouts are identical.
-        #[allow(unsafe_code)]
-        unsafe impl Zeroable for Point<$f> {}
-
-        // SAFETY: `Point` is `#[repr(transparent)]` over `Vec2`, which is `Pod`: it has no
-        // padding, no invalid bit patterns, and the zero-sized tag adds neither.
-        #[allow(unsafe_code)]
-        unsafe impl Pod for Point<$f> {}
+        pod!(Point<$f>, 8);
     )*};
 }
 

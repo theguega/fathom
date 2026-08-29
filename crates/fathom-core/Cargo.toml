@@ -11,9 +11,8 @@ keywords     = ["visualization", "robotics", "graphics"]
 categories   = ["graphics", "science::robotics"]
 
 [dependencies]
-glam      = { workspace = true }
-bytemuck  = { workspace = true }
-thiserror = { workspace = true }
+bytemuck = { workspace = true }
+glam     = { workspace = true }
 
 [lints]
 workspace = true
