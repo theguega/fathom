@@ -11,7 +11,9 @@ publish      = false
 
 [lib]
 name       = "fathom"
-crate-type = ["cdylib", "rlib"]
+# cdylib only: an rlib named `fathom` collides with the umbrella crate's,
+# and nothing links this one as a Rust library.
+crate-type = ["cdylib"]
 
 [dependencies]
 fathom-core   = { workspace = true }

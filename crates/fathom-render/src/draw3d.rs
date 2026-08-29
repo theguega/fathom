@@ -7,8 +7,10 @@
 
 use fathom_core::{Color, Mat3, Mat4, Meters, Vec3, WorldPoint};
 
-use crate::vertex::Vertex;
-use crate::{Scene, font, vertex::Topology};
+use crate::{
+    Scene, font,
+    vertex::{Topology, Vertex},
+};
 
 /// Push one line segment. The caller has already reserved the room.
 #[inline]

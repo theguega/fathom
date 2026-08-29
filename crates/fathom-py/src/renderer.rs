@@ -19,7 +19,12 @@ use winit::{
 use crate::convert;
 
 /// A GPU texture. Cloning is cheap; clones address the same allocation.
-#[pyclass(module = "fathom", from_py_object)]
+///
+/// `unsendable` because a texture belongs to the [`Renderer`] that made it, and
+/// that is unsendable too. It also sidesteps asking whether the whole wgpu
+/// handle graph is `Send`, a query that recurses far enough to hit the
+/// compiler's limit.
+#[pyclass(module = "fathom", from_py_object, unsendable)]
 #[derive(Clone, Debug)]
 pub struct Texture(pub(crate) fr::Texture);
 

@@ -7,11 +7,11 @@
 // glob pick a winner, the frame keeps the longer name here - it is almost
 // always spelled `CameraPoint` anyway - and `Camera` means the thing you bind
 // to a `Scene`.
-pub use fathom_core::Camera as CameraFrame;
 pub use fathom_core::{
-    CalibError, CameraPoint, Color, ColorMap, CoordFrame, Extrinsics, FrameIdx, Homography, Image,
-    ImagePoint, Intrinsics, Mat3, Mat4, Meters, Plane, PlanePoint, Point, Quat, Radians, Rect,
-    TextScale, Timestamp, Vec2, Vec3, World, WorldPoint, look_at, point,
+    CalibError, Camera as CameraFrame, CameraPoint, Color, ColorMap, CoordFrame, Extrinsics,
+    FrameIdx, Homography, Image, ImagePoint, Intrinsics, Mat3, Mat4, Meters, Plane, PlanePoint,
+    Point, Quat, Radians, Rect, TextScale, Timestamp, Vec2, Vec3, World, WorldPoint, look_at,
+    point,
 };
 pub use fathom_geom::{
     colormap, colormap_into, homography_from_correspondences, project, unproject, unwarp, warp,
