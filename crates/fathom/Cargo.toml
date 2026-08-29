@@ -10,9 +10,15 @@ readme       = "README.md"
 keywords     = ["visualization", "robotics", "pointcloud", "debugging"]
 categories   = ["graphics", "visualization", "science::robotics"]
 
+[features]
+default = []
+## mp4 export. Spawns the `ffmpeg` binary; links no C libraries.
+media = ["dep:fathom-media"]
+
 [dependencies]
 fathom-core   = { workspace = true }
 fathom-geom   = { workspace = true }
+fathom-media  = { workspace = true, optional = true }
 fathom-render = { workspace = true }
 
 [dev-dependencies]

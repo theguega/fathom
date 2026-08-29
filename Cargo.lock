@@ -513,6 +513,7 @@ dependencies = [
  "bytemuck",
  "fathom-core",
  "fathom-geom",
+ "fathom-media",
  "fathom-render",
  "trybuild",
  "winit",
@@ -534,6 +535,10 @@ dependencies = [
  "fathom-core",
  "glam",
 ]
+
+[[package]]
+name = "fathom-media"
+version = "0.1.0"
 
 [[package]]
 name = "fathom-render"

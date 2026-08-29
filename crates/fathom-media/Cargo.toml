@@ -1,0 +1,20 @@
+[package]
+name         = "fathom-media"
+description  = "The mp4 export sink for fathom: raw frames in, encoded video out."
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+readme       = "README.md"
+keywords     = ["visualization", "video", "encode", "ffmpeg"]
+categories   = ["multimedia::video"]
+
+[dependencies]
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]

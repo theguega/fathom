@@ -4,15 +4,15 @@
 //! or a liveness assumption. It does not: the only difference is `Ctx::headless`
 //! instead of `Ctx::new`, and `read_pixels` instead of a window.
 //!
-//! Writes raw RGBA8 frames, top row first, which is what an encoder wants on
-//! stdin. To make an mp4 straight from it:
+//! With `--features media` it writes `out.mp4` directly. Without it, it writes
+//! raw RGBA8 frames, top row first, which is what any encoder wants on stdin:
 //!
 //! ```sh
+//! cargo run -p fathom --example headless_export --features media
+//! # or, without the feature:
 //! cargo run -p fathom --example headless_export
 //! ffmpeg -f rawvideo -pix_fmt rgba -s 1280x720 -r 30 -i frames.rgba out.mp4
 //! ```
-//!
-//! Run with `cargo run -p fathom --example headless_export`.
 #![allow(
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
@@ -20,9 +20,54 @@
 )]
 //  ^ example code: every cast here is small and deliberate
 
-use std::{error::Error, fs::File, io::Write as _, num::NonZeroU32};
+use std::{error::Error, num::NonZeroU32};
 
 use fathom::prelude::*;
+
+/// The only thing that differs between the two builds: where frames go.
+#[allow(unreachable_pub)] // an example is its own crate root
+#[cfg(feature = "media")]
+mod sink {
+    use fathom::media::{EncodeOptions, Encoder, Open};
+
+    pub struct Sink(Encoder<Open>);
+
+    impl Sink {
+        pub fn new(w: u32, h: u32) -> Result<Self, Box<dyn std::error::Error>> {
+            let options = EncodeOptions::new(30);
+            Ok(Self(Encoder::new("out.mp4", w, h, &options)?))
+        }
+        pub fn push(&mut self, rgba: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+            self.0.write(rgba)?;
+            Ok(())
+        }
+        pub fn close(self) -> Result<String, Box<dyn std::error::Error>> {
+            let done = self.0.finish()?;
+            Ok(format!("out.mp4 ({} frames)", done.frames()))
+        }
+    }
+}
+
+#[allow(unreachable_pub)] // an example is its own crate root
+#[cfg(not(feature = "media"))]
+mod sink {
+    use std::{fs::File, io::Write as _};
+
+    pub struct Sink(File);
+
+    impl Sink {
+        pub fn new(_w: u32, _h: u32) -> Result<Self, Box<dyn std::error::Error>> {
+            Ok(Self(File::create("frames.rgba")?))
+        }
+        pub fn push(&mut self, rgba: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+            self.0.write_all(rgba)?;
+            Ok(())
+        }
+        pub fn close(self) -> Result<String, Box<dyn std::error::Error>> {
+            Ok("frames.rgba".to_owned())
+        }
+    }
+}
 
 const W: u32 = 1280;
 const H: u32 = 720;
@@ -44,7 +89,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut plot: Vec<ImagePoint> = Vec::with_capacity(FRAMES as usize);
     let mut history: Vec<f32> = Vec::with_capacity(FRAMES as usize);
 
-    let mut out = File::create("frames.rgba")?;
+    let mut out = sink::Sink::new(W, H)?;
 
     for frame in 0..FRAMES {
         let secs = frame as f32 / 30.0;
@@ -132,11 +177,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         let pixels = ctx
             .read_pixels()
             .ok_or("headless context should read back")?;
-        out.write_all(&pixels)?;
+        out.push(&pixels)?;
     }
 
+    let written = out.close()?;
     println!(
-        "wrote {FRAMES} frames of {W}x{H} RGBA to frames.rgba ({} vertices peak)",
+        "wrote {FRAMES} frames of {W}x{H} to {written}, {} vertices peak",
         ctx.peak_vertices()
     );
     Ok(())

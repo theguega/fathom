@@ -6,5 +6,8 @@
 
 #[test]
 fn type_guarantees_hold() {
-    trybuild::TestCases::new().compile_fail("tests/ui/*.rs");
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/*.rs");
+    #[cfg(feature = "media")]
+    t.compile_fail("tests/ui/media/*.rs");
 }

@@ -18,6 +18,17 @@ pub use fathom_geom::{
 };
 pub use fathom_render::*;
 
+/// mp4 export: rendered frames in, an encoded file out.
+///
+/// Off by default. It spawns the `ffmpeg` binary rather than linking a C
+/// library, so enabling it adds no dependencies and no build-time toolchain -
+/// only a runtime requirement that `ffmpeg` be on `PATH`.
+#[cfg(feature = "media")]
+#[cfg_attr(docsrs, doc(cfg(feature = "media")))]
+pub mod media {
+    pub use fathom_media::*;
+}
+
 /// Everything fathom exposes, in one `use`.
 ///
 /// The whole public surface is about forty names and every one of them is

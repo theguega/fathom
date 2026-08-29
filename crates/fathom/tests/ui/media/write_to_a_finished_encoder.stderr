@@ -1,0 +1,7 @@
+error[E0599]: no method named `write` found for struct `Encoder<Finished>` in the current scope
+ --> tests/ui/media/write_to_a_finished_encoder.rs:9:10
+  |
+9 |     done.write(&[0; 1024])?;
+  |          ^^^^^ method not found in `Encoder<Finished>`
+  |
+  = note: the method was found for `Encoder<Open>`
