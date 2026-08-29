@@ -3,9 +3,10 @@
 //! These render actual pixels and read them back, which is the only way to
 //! catch a wrong winding order, an inverted Y axis or a colour space mistake.
 
-use fathom_core::{Color, ImagePoint, Meters, Radians, Rect, TextScale, Vec3, WorldPoint};
+use fathom_core::{Color, ImagePoint, Mat4, Meters, Radians, Rect, TextScale, Vec3, WorldPoint};
 use fathom_render::{
-    Camera, Ctx, begin_frame, draw_grid, draw_line_strip_3d, draw_polygon, draw_text_at,
+    Camera, Ctx, begin_frame, draw_frames, draw_grid, draw_line_strip_3d, draw_polygon,
+    draw_text_at,
 };
 
 const W: u32 = 64;
@@ -246,4 +247,46 @@ fn a_panelled_scene_stays_inside_its_panel() {
 
     assert_eq!(lit_in(0, 32), 0, "the left half must be untouched");
     assert!(lit_in(32, 64) > 20, "the right half should hold the grid");
+}
+
+#[test]
+fn axis_triads_are_not_hidden_by_their_own_bones() {
+    let Some(mut ctx) = ctx() else { return };
+    ctx.set_clear_color(Color::BLACK);
+
+    // A chain that translates along its own +Y, so every bone lies exactly on
+    // top of the green axis it connects. All three axes must still be legible.
+    let links: [Mat4; 5] = core::array::from_fn(|i| {
+        #[allow(clippy::cast_precision_loss)]
+        Mat4::from_translation(Vec3::new(0.0, i as f32 * 0.2, 0.0))
+    });
+
+    let cam = Camera::perspective(
+        Vec3::new(1.2, 0.5, 1.2),
+        Vec3::new(0.0, 0.4, 0.0),
+        Vec3::Y,
+        Radians(1.0),
+        1.0,
+        Meters(0.01),
+        Meters(100.0),
+    );
+
+    let mut f = begin_frame(&mut ctx);
+    let mut s = f.scene(&cam);
+    draw_frames(&mut s, &links, Meters(0.12));
+    s.end();
+    f.end();
+
+    let px = ctx.read_pixels().unwrap_or_default();
+    let count = |pick: fn(&[u8]) -> bool| px.chunks_exact(4).filter(|p| pick(p)).count();
+    let red = count(|p| p[0] > 180 && p[1] < 80 && p[2] < 80);
+    let green = count(|p| p[1] > 180 && p[0] < 80 && p[2] < 80);
+    let blue = count(|p| p[2] > 180 && p[0] < 80 && p[1] < 80);
+
+    assert!(red > 3, "X axis should be visible, got {red} pixels");
+    assert!(blue > 3, "Z axis should be visible, got {blue} pixels");
+    assert!(
+        green > 3,
+        "Y axis is colinear with the bone and must still win the depth tie, got {green} pixels"
+    );
 }

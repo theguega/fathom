@@ -225,6 +225,17 @@ pub fn draw_frames(s: &mut Scene<'_, '_>, transforms: &[Mat4], axis_len: Meters)
         };
         s.begin(Topology::Lines, n * 6 + bones * 2);
 
+        // Bones first, triads second. A link usually translates along one of
+        // its own axes, so the bone lies exactly on top of that axis; drawing
+        // the triads last lets them win the depth tie, which is the right way
+        // round because the triad is the information and the bone is context.
+        for i in done..(done + bones) {
+            let (Some(a), Some(b)) = (transforms.get(i), transforms.get(i + 1)) else {
+                continue;
+            };
+            let grey = Color::rgb(110, 110, 120);
+            segment(s, a.w_axis.truncate(), b.w_axis.truncate(), grey, grey);
+        }
         for i in done..done + n {
             let Some(m) = transforms.get(i) else { continue };
             let origin = m.w_axis.truncate();
@@ -235,13 +246,6 @@ pub fn draw_frames(s: &mut Scene<'_, '_>, transforms: &[Mat4], axis_len: Meters)
             ] {
                 segment(s, origin, origin + axis.truncate() * len, color, color);
             }
-        }
-        for i in done..(done + bones) {
-            let (Some(a), Some(b)) = (transforms.get(i), transforms.get(i + 1)) else {
-                continue;
-            };
-            let grey = Color::rgb(110, 110, 120);
-            segment(s, a.w_axis.truncate(), b.w_axis.truncate(), grey, grey);
         }
         done += n;
     }

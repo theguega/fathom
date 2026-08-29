@@ -510,6 +510,7 @@ dependencies = [
 name = "fathom"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
  "fathom-core",
  "fathom-geom",
  "fathom-render",
