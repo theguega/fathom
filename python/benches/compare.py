@@ -7,7 +7,7 @@
 Build fathom with --release. A debug build of the extension is roughly 24x
 slower here, which is enough to make the comparison meaningless.
 
-Same job, Steady-state cost of one updated frame.
+Steady-state cost of one updated frame.
 
 The job: a 3D trajectory of N points plus a scrolling time series, redrawn
 every frame at 1280x720 - the loop a policy debugger actually runs.
