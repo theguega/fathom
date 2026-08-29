@@ -31,6 +31,9 @@ confidence-threshold = 0.9
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
+# `book-tests` depends on `fathom` by path with no version, which is a wildcard
+# to this check. It is `publish = false`, so there is no version to pin against.
+allow-wildcard-paths = true
 
 [sources]
 unknown-registry = "deny"

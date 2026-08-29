@@ -16,7 +16,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      RUSTDOCFLAGS: -D warnings --cfg docsrs --generate-link-to-definition
+      RUSTDOCFLAGS: -D warnings --cfg docsrs -Z unstable-options --generate-link-to-definition
+      # rust-toolchain.toml pins 1.97.1 and wins over the action's choice, so
+      # without this the nightly-only rustdoc flags above are rejected.
+      RUSTUP_TOOLCHAIN: nightly
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly

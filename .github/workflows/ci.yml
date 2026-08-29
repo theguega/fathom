@@ -117,17 +117,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y mesa-vulkan-drivers vulkan-tools libvulkan1
-      - run: pip install maturin numpy pytest
-      # `maturin develop` installs into a virtualenv and refuses without one.
+      # `maturin develop` installs into a virtualenv and refuses without one,
+      # and it has to be the venv's own maturin so it targets that interpreter.
       - run: python -m venv .venv
-      - run: .venv/bin/pip install numpy pytest
+      - run: .venv/bin/pip install maturin numpy pytest mypy
       - run: .venv/bin/maturin develop --release -m crates/fathom-py/Cargo.toml
         env:
           VIRTUAL_ENV: ${{ github.workspace }}/.venv
       - run: .venv/bin/python -m pytest crates/fathom-py/tests -v
       # The stubs are checked in, so a signature change that does not reach them
       # is a diff, not a surprise for editors and mypy downstream.
-      - run: .venv/bin/pip install mypy && .venv/bin/mypy --strict crates/fathom-py/fathom.pyi
+      - run: .venv/bin/mypy --strict crates/fathom-py/fathom.pyi
 
   deny:
     runs-on: ubuntu-latest
