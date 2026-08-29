@@ -212,3 +212,38 @@ fn a_frame_that_overflows_the_arena_still_draws_everything() {
         "the whole polyline should be drawn, got {lit} lit pixels"
     );
 }
+
+#[test]
+fn a_panelled_scene_stays_inside_its_panel() {
+    let Some(mut ctx) = ctx() else { return };
+    ctx.set_clear_color(Color::BLACK);
+
+    let cam = Camera::perspective(
+        Vec3::new(0.0, 0.0, 2.0),
+        Vec3::ZERO,
+        Vec3::Y,
+        Radians(1.2),
+        1.0,
+        Meters(0.01),
+        Meters(100.0),
+    );
+
+    let mut f = begin_frame(&mut ctx);
+    let [_, right] = f.viewport().split_h();
+    let mut s = f.scene_in(&cam, right);
+    // A grid big enough to cover the whole window if it were not scissored.
+    draw_grid(&mut s, 40, Meters(0.5), Color::WHITE);
+    s.end();
+    f.end();
+
+    let px = ctx.read_pixels().unwrap_or_default();
+    let lit_in = |x0: u32, x1: u32| {
+        (0..H)
+            .flat_map(|y| (x0..x1).map(move |x| (x, y)))
+            .filter(|&(x, y)| pixel(&px, x, y)[0] > 40)
+            .count()
+    };
+
+    assert_eq!(lit_in(0, 32), 0, "the left half must be untouched");
+    assert!(lit_in(32, 64) > 20, "the right half should hold the grid");
+}

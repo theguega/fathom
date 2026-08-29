@@ -51,10 +51,34 @@ impl<'a> Frame<'a> {
     /// 3D primitives take the returned [`Scene`], which is how "draw a
     /// trajectory without saying where the camera is" is made unrepresentable.
     pub fn scene<'f>(&'f mut self, cam: &Camera) -> Scene<'f, 'a> {
+        let full = self.viewport();
+        self.scene_in(cam, full)
+    }
+
+    /// Bind a camera to one panel of the window.
+    ///
+    /// The 3D half of `Rect` layout: the scene is viewported and scissored to
+    /// `panel`, so it sits beside a video stream instead of covering it. Pass
+    /// the panel's own aspect ratio to the camera, or the view will be
+    /// stretched.
+    ///
+    /// ```no_run
+    /// # use fathom_render::{Ctx, Orbit, begin_frame};
+    /// # fn demo(ctx: &mut Ctx, orbit: &Orbit) {
+    /// let mut f = begin_frame(ctx);
+    /// let [left, right] = f.viewport().split_h();
+    /// let mut s = f.scene_in(&orbit.camera(right.w / right.h), right);
+    /// // ... 3D lands only in the right half ...
+    /// s.end();
+    /// f.end();
+    /// # }
+    /// ```
+    pub fn scene_in<'f>(&'f mut self, cam: &Camera, panel: Rect) -> Scene<'f, 'a> {
         Scene {
             view_proj: cam.view_proj(),
             right: cam.right(),
             up: cam.up(),
+            viewport: [panel.x, panel.y, panel.w, panel.h],
             frame: self,
         }
     }
@@ -94,8 +118,17 @@ impl<'a> Frame<'a> {
         texture: Option<&Arc<wgpu::BindGroup>>,
         count: usize,
     ) {
+        #[allow(clippy::cast_precision_loss)]
+        let full = [0.0, 0.0, self.size.0 as f32, self.size.1 as f32];
         let (device, queue, batcher) = self.ctx.parts();
-        batcher.begin(device, queue, topology, texture, count);
+        batcher.begin(device, queue, topology, texture, full, count);
+    }
+
+    /// Same, but confined to a scene's panel.
+    #[inline]
+    pub(crate) fn begin_in(&mut self, topology: Topology, viewport: [f32; 4], count: usize) {
+        let (device, queue, batcher) = self.ctx.parts();
+        batcher.begin(device, queue, topology, None, viewport, count);
     }
 
     #[inline]
@@ -119,6 +152,7 @@ pub struct Scene<'f, 'a> {
     view_proj: Mat4,
     right: Vec3,
     up: Vec3,
+    viewport: [f32; 4],
 }
 
 impl Scene<'_, '_> {
@@ -141,7 +175,7 @@ impl Scene<'_, '_> {
 
     #[inline]
     pub(crate) fn begin(&mut self, topology: Topology, count: usize) {
-        self.frame.begin(topology, None, count);
+        self.frame.begin_in(topology, self.viewport, count);
     }
 
     #[inline]

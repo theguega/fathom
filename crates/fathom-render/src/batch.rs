@@ -10,10 +10,22 @@ use std::sync::Arc;
 
 use crate::vertex::{Topology, Vertex};
 
+/// Viewports are copied verbatim out of a `Rect`, never computed, so bitwise
+/// equality is exactly the question being asked: did the caller hand us the
+/// same panel again?
+#[inline]
+fn viewports_equal(a: [f32; 4], b: [f32; 4]) -> bool {
+    a.iter().zip(&b).all(|(a, b)| a.to_bits() == b.to_bits())
+}
+
 /// One contiguous run of vertices sharing a pipeline and a texture.
 #[derive(Debug)]
 struct Cmd {
     topology: Topology,
+    /// Pixel rectangle this run draws into: `[x, y, w, h]`. 2D uses the whole
+    /// framebuffer; a `Scene` uses its panel, so a 3D view can sit beside a
+    /// video without bleeding over it.
+    viewport: [f32; 4],
     /// `None` means the font/white atlas, which is bound once and serves every
     /// untextured primitive through its solid white texel.
     texture: Option<Arc<wgpu::BindGroup>>,
@@ -80,6 +92,7 @@ impl Batcher {
         queue: &wgpu::Queue,
         topology: Topology,
         texture: Option<&Arc<wgpu::BindGroup>>,
+        viewport: [f32; 4],
         count: usize,
     ) {
         debug_assert!(
@@ -94,6 +107,7 @@ impl Batcher {
         let start = self.arena.len() as u32;
         let mergeable = self.cmds.last().is_some_and(|last| {
             last.topology == topology
+                && viewports_equal(last.viewport, viewport)
                 && last.chunk == self.chunk
                 && last.start + last.count == start
                 && match (&last.texture, texture) {
@@ -112,6 +126,7 @@ impl Batcher {
         } else {
             self.cmds.push(Cmd {
                 topology,
+                viewport,
                 texture: texture.cloned(),
                 chunk: self.chunk,
                 start,
@@ -168,6 +183,7 @@ impl Batcher {
         let mut bound_chunk = None;
         let mut bound_topology = None;
         let mut bound_texture: Option<*const wgpu::BindGroup> = None;
+        let mut bound_viewport = None;
 
         for cmd in &self.cmds {
             let Some(buffer) = self.chunks.get(cmd.chunk as usize) else {
@@ -176,6 +192,13 @@ impl Batcher {
             if bound_chunk != Some(cmd.chunk) {
                 pass.set_vertex_buffer(0, buffer.slice(..));
                 bound_chunk = Some(cmd.chunk);
+            }
+            if bound_viewport != Some(cmd.viewport) {
+                let [x, y, w, h] = cmd.viewport;
+                pass.set_viewport(x, y, w.max(1.0), h.max(1.0), 0.0, 1.0);
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                pass.set_scissor_rect(x as u32, y as u32, w.max(1.0) as u32, h.max(1.0) as u32);
+                bound_viewport = Some(cmd.viewport);
             }
             if bound_topology != Some(cmd.topology) {
                 pass.set_pipeline(pipelines.get(cmd.topology));
